@@ -1,19 +1,18 @@
+import tkinter as tk
+from tkinter import messagebox
 from pyswip import Prolog
 
 
 def is_valid_state(state):
-    n = len(state)  #Number of rows
-    m = len(state[0]) if state else 0  #Number of columns
+    n = len(state)  # Number of rows
+    m = len(state[0]) if state else 0  # Number of columns
 
-    #Check if the grid is square and either 3x3 or 4x4
     if n != m or (n not in [3, 4]):
         return False, "State must be a 3x3 or 4x4 matrix"
 
-    #Flatten the matrix and sort elements
     flat_state = [item for sublist in state for item in sublist]
     flat_state_sorted = sorted(flat_state)
 
-    #Check for the correct elements in the matrix
     correct_elements = list(range(n * n))
     if flat_state_sorted != correct_elements:
         return False, f"State must contain all numbers from 0 to {n * n - 1}"
@@ -22,7 +21,6 @@ def is_valid_state(state):
 
 
 def count_inversions(state):
-    #Flatten the list and remove the blank (0)
     flat_list = [number for row in state for number in row if number != 0]
     inversions = 0
     for i in range(len(flat_list)):
@@ -33,13 +31,10 @@ def count_inversions(state):
 
 
 def find_blank_row(state):
-    #Finds the row of the blank space (0), counting from the bottom
     n = len(state)
     for i in range(n):
         if 0 in state[i]:
-            blank_row_from_bottom = n - i
-            print(f"Blank is in row {blank_row_from_bottom} from the bottom")
-            return blank_row_from_bottom
+            return n - i
 
 
 def is_solvable(state):
@@ -47,75 +42,102 @@ def is_solvable(state):
     blank_row = find_blank_row(state)
     n = len(state)
 
-    print(f"Inversions: {inversions}")
-    print(f"Blank row from bottom: {blank_row}")
-
     if n == 3:
-        #For a 3x3 puzzle, solvable if inversions are even
         return inversions % 2 == 0
     elif n == 4:
-        #For a 4x4 puzzle, check the blank row and inversion parity
-        if blank_row % 2 == 0:  #Blank is on an even row from the bottom
-            return inversions % 2 == 1  #Need odd inversions
-        else:  #Blank is on an odd row from the bottom
-            return inversions % 2 == 0  #Need even inversions
+        if blank_row % 2 == 0:
+            return inversions % 2 == 1
+        else:
+            return inversions % 2 == 0
 
-
-#Example usage
-state_3x3_solvable = [[1, 2, 5], [8, 0, 4], [7, 6, 3]]  # Solvable
-state_3x3_unsolvable = [[8, 1, 2], [0, 4, 3], [7, 6, 5]]  # Unsolvable due to an odd number of inversions
-
-#For 4x4 grids
-state_4x4_solvable = [[4, 0, 10, 9], [12, 5, 3, 15], [7, 8, 14, 6], [13, 2, 11, 1]]  # Solvable
-state_4x4_unsolvable = [[3, 8, 6, 1], [5, 4, 10, 2], [9, 7, 12, 11], [13, 15, 14, 0]]  # Unsolvable
-
-# Validate states
-# print(is_valid_state(state_3x3_solvable))
-# print(is_valid_state(state_3x3_unsolvable))
-# print(is_valid_state(state_4x4_solvable))
-# print(is_valid_state(state_4x4_unsolvable))
-
-# print("3x3 Solvable?", is_solvable(state_3x3_solvable))
-# print("3x3 Unsolvable?", is_solvable(state_3x3_unsolvable))
-# print("4x4 Solvable?", is_solvable(state_4x4_solvable))
-# print("4x4 Unsolvable?", is_solvable(state_4x4_unsolvable))
-
-print('\n')
-
-from pyswip import Prolog
 
 def solve_puzzle3x3(initial_state):
     prolog = Prolog()
     prolog.consult("nPuzzleSolver3x3.pl")
-
-    State = initial_state
+    State = [('*' if x == 0 else x) for row in initial_state for x in row]
     MovesList = []
-    Modified_state = [('*' if x == 0 else x) for row in State for x in row]
-    solution = prolog.query(f"ids({Modified_state}, {MovesList}).")
-    print("Solution retrieved successfully!")  # Add this line to indicate the solution has been retrieved
+    solution = prolog.query(f"ids({State}, {MovesList}).")
     return solution
+
 
 def solve_puzzle4x4(initial_state):
     prolog = Prolog()
     prolog.consult("nPuzzleSolver4x4.pl")
-
-    State = initial_state
+    State = [('*' if x == 0 else x) for row in initial_state for x in row]
     MovesList = []
-    Modified_state = [('*' if x == 0 else x) for row in State for x in row]
-    solution = prolog.query(f"ids({Modified_state},{MovesList}).")
-    print("Solution retrieved successfully!")
+    solution = prolog.query(f"ids({State}, {MovesList}).")
     return solution
 
-# Example initial state for 3x3
-initial_state_3x3 = [[1, 2, 5], [8, 0, 4], [7, 6, 3]]
-solution = solve_puzzle3x3(initial_state_3x3)
-for sol in solution:
-    print(sol)
 
-# Example initial state for 4x4
-# initial_state_4x4 = [[15, 11, 13, 2], [8, 3, 10, 9], [1, 14, 5, 6], [12, 7, 4, 0]]
-# solution = solve_puzzle4x4(initial_state_4x4)
-# for sol in solution:
-#     print(sol)
+class PuzzleGUI(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("n-Puzzle Solver")
+        self.geometry("400x400")
+
+        self.size = 3
+        self.entries = []
+
+        self.create_widgets()
+
+    def create_widgets(self):
+        self.size_var = tk.IntVar(value=3)
+
+        tk.Radiobutton(self, text="3x3", variable=self.size_var, value=3, command=self.update_grid).pack()
+        tk.Radiobutton(self, text="4x4", variable=self.size_var, value=4, command=self.update_grid).pack()
+
+        self.grid_frame = tk.Frame(self)
+        self.grid_frame.pack()
+
+        self.update_grid()
+
+        self.solve_button = tk.Button(self, text="Solve!", command=self.solve_puzzle)
+        self.solve_button.pack(pady=10)
+
+        self.result_text = tk.Text(self, height=10, width=40)
+        self.result_text.pack(pady=10)
+
+    def update_grid(self):
+        for widget in self.grid_frame.winfo_children():
+            widget.destroy()
+
+        self.entries = []
+        self.size = self.size_var.get()
+        for i in range(self.size):
+            row_entries = []
+            for j in range(self.size):
+                entry = tk.Entry(self.grid_frame, width=5)
+                entry.grid(row=i, column=j, padx=5, pady=5)
+                row_entries.append(entry)
+            self.entries.append(row_entries)
+
+    def solve_puzzle(self):
+        try:
+            state = [[int(self.entries[i][j].get()) for j in range(self.size)] for i in range(self.size)]
+        except ValueError:
+            messagebox.showerror("Invalid input", "Please enter valid numbers in the grid.")
+            return
+
+        valid, message = is_valid_state(state)
+        if not valid:
+            messagebox.showerror("Invalid state", message)
+            return
+
+        if not is_solvable(state):
+            messagebox.showerror("Unsolvable", "The puzzle is unsolvable.")
+            return
+
+        if self.size == 3:
+            solution = solve_puzzle3x3(state)
+        else:
+            solution = solve_puzzle4x4(state)
+
+        self.result_text.delete("1.0", tk.END)
+        self.result_text.insert(tk.END, "Solution:\n")
+        for move in solution:
+            self.result_text.insert(tk.END, f"{move}\n")
 
 
+if __name__ == "__main__":
+    app = PuzzleGUI()
+    app.mainloop()
