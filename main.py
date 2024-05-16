@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 from pyswip import Prolog
+import io
+from contextlib import redirect_stdout
 
 
 def is_valid_state(state):
@@ -55,9 +57,17 @@ def solve_puzzle3x3(initial_state):
     prolog = Prolog()
     prolog.consult("nPuzzleSolver3x3.pl")
     State = [('*' if x == 0 else x) for row in initial_state for x in row]
-    MovesList = []
-    solution = prolog.query(f"ids({State}, {MovesList}).")
-    return solution
+    query = f"ids({State}, MovesList)"
+
+    # Run the query and capture the output
+    result = list(prolog.query(query))
+
+    # Check if there's any result
+    if result:
+        moves_list = result[0]['MovesList']
+    else:
+        moves_list = []
+    return moves_list
 
 
 def solve_puzzle4x4(initial_state):

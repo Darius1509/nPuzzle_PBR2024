@@ -3,9 +3,9 @@ ids(StartList, MovesList) :-
     start(StartState, State),
     length(Moves, N),
     dfs([State], Moves, Path), !,
+    maplist(atom_string, Moves, MovesList),  % Convert moves to strings
     show([start|Moves], Path),
-    format('~nmoves = ~w~n', [N]),
-    MovesList = Moves.
+    format('~nmoves = ~w~n', [N]).
 
 start(StartState, StartState).
 
