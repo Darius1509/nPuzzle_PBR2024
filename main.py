@@ -76,9 +76,19 @@ def solve_puzzle4x4(initial_state):
     prolog = Prolog()
     prolog.consult("nPuzzleSolver4x4.pl")
     State = [('*' if x == 0 else x) for row in initial_state for x in row]
-    MovesList = []
-    solution = prolog.query(f"ids({State}, {MovesList}).")
-    return solution
+    query = f"ids({State}, MovesList)"
+
+    # Run the query and capture the output
+    result = list(prolog.query(query))
+
+    # Check if there's any result
+    if result:
+        moves_list = result[0]['MovesList']
+        # Decode byte literals to strings
+        moves_list = [move.decode('utf-8') for move in moves_list]
+    else:
+        moves_list = []
+    return moves_list
 
 
 class PuzzleGUI(tk.Tk):
