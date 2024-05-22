@@ -29,7 +29,24 @@ show([Move|Moves], [State|States]) :-
     format('~w ~w ~w~n', [G, H, I]),
     show(Moves, States).
 
-goal(state(1, 2, 3, 4, 5, 6, 7, 8, *)).
+goal(state(A, B, C, D, E, F, G, H, I)) :-
+    StateList = [A, B, C, D, E, F, G, H, I],
+    check_order(StateList).
+
+check_order([1, 2, 3, 4, 5, 6, 7, 8, *]).
+check_order([1, 2, 3, 4, 5, 6, 7, *, 8]).
+check_order([1, 2, 3, 4, 5, 6, *, 7, 8]).
+check_order([1, 2, 3, 4, 5, *, 6, 7, 8]).
+check_order([1, 2, 3, 4, *, 5, 6, 7, 8]).
+check_order([1, 2, 3, *, 4, 5, 6, 7, 8]).
+check_order([1, 2, *, 3, 4, 5, 6, 7, 8]).
+check_order([1, *, 2, 3, 4, 5, 6, 7, 8]).
+check_order([*, 1, 2, 3, 4, 5, 6, 7, 8]).
+
+
+matches_order([], []).
+matches_order([H|T1], [H|T2]) :- matches_order(T1, T2).
+matches_order([*|T1], [_|T2]) :- matches_order(T1, T2).
 
 move(state(*, B, C, D, E, F, G, H, J), state(B, *, C, D, E, F, G, H, J), right).
 move(state(*, B, C, D, E, F, G, H, J), state(D, B, C, *, E, F, G, H, J), down).
