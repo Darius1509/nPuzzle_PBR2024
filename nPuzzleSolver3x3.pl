@@ -3,7 +3,7 @@ ids(StartList, MovesList) :-
     start(StartState, State),
     length(Moves, N),
     dfs([State], Moves, Path), !,
-    maplist(atom_string, Moves, MovesList),  % Convert moves to strings
+    maplist(atom_string, Moves, MovesList),
     show([start|Moves], Path),
     format('~nmoves = ~w~n', [N]).
 
@@ -47,7 +47,7 @@ matches_order([], []).
 matches_order([H|T1], [H|T2]) :- matches_order(T1, T2).
 matches_order([*|T1], [_|T2]) :- matches_order(T1, T2).
 
-% Define possible moves for the blank space (*)
+% possible moves for the blank space (*)
 move(State1, State2, Move) :-
     state_to_list(State1, List),
     nth0(Index, List, *),
@@ -55,24 +55,20 @@ move(State1, State2, Move) :-
     swap(List, Index, NextIndex, NewList),
     list_to_state(NewList, State2).
 
-% Convert state to list representation
 state_to_list(state(A, B, C, D, E, F, G, H, I), [A, B, C, D, E, F, G, H, I]).
 
-% Swap elements at positions Index and NextIndex in the list
 swap(List, Index, NextIndex, NewList) :-
     nth0(Index, List, Elem1),
     nth0(NextIndex, List, Elem2),
     set_elem(List, Index, Elem2, TempList),
     set_elem(TempList, NextIndex, Elem1, NewList).
 
-% Set element at specific position in the list
 set_elem([_|T], 0, Elem, [Elem|T]).
 set_elem([H|T], Index, Elem, [H|R]) :-
     Index > 0,
     Index1 is Index - 1,
     set_elem(T, Index1, Elem, R).
 
-% Define valid moves for each position of the blank space
 valid_move(0, 1, right).
 valid_move(0, 3, down).
 valid_move(1, 0, left).

@@ -58,8 +58,6 @@ expand((State, Depth, _, M, L), All_My_Children, Goal) :-
 
 isequal(X, X).
 
-% Puzzle moves
-
 left(State, Goal) :-
     getList(State, L1),
     indexOf(L1, *, I1),

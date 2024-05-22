@@ -1,13 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox
 from pyswip import Prolog
-import io
-from contextlib import redirect_stdout
 
 
 def is_valid_state(state):
-    n = len(state)  # Number of rows
-    m = len(state[0]) if state else 0  # Number of columns
+    n = len(state)
+    m = len(state[0]) if state else 0
 
     if n != m or (n not in [3, 4]):
         return False, "State must be a 3x3 or 4x4 matrix"
@@ -59,16 +57,13 @@ def solve_puzzle3x3(initial_state):
     State = [('*' if x == 0 else x) for row in initial_state for x in row]
     query = f"ids({State}, MovesList)"
 
-    # Run the query and capture the output
     result = list(prolog.query(query))
 
-    # Check if there's any result
     if result:
         moves_list = result[0]['MovesList']
-        # Decode byte literals to strings
         moves_list = [move.decode('utf-8') for move in moves_list]
     else:
-        moves_list = []
+        moves_list = ['No solution found.']
     return moves_list
 
 
@@ -78,14 +73,12 @@ def solve_puzzle4x4(initial_state):
     State = [('*' if x == 0 else x) for row in initial_state for x in row]
     query = f"ids({State}, MovesList)"
 
-    # Run the query and capture the output
     result = list(prolog.query(query))
 
-    # Check if there's any result
     if result:
         moves_list = result[0]['MovesList']
     else:
-        moves_list = []
+        moves_list = ['No solution found.']
     return moves_list
 
 
