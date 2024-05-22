@@ -84,8 +84,6 @@ def solve_puzzle4x4(initial_state):
     # Check if there's any result
     if result:
         moves_list = result[0]['MovesList']
-        # Decode byte literals to strings
-        moves_list = [move.decode('utf-8') for move in moves_list]
     else:
         moves_list = []
     return moves_list

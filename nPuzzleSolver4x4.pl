@@ -1,28 +1,25 @@
+:- use_module(library(lists)).
+
 ids(StartList, MovesList) :-
     list_to_state(StartList, StartState),
-    start(StartState, State),
-    length(Moves, N),
-    dfs([State], Moves, Path), !,
-    maplist(atom_string, Moves, MovesList),  % Convert moves to strings
-    show([start|Moves], Path),
-    format('~nmoves = ~w~n', [N]).
+    goal_state(GoalState),
+    (answer(StartState, GoalState, MovesList) -> true ; false).
 
-start(StartState, StartState).
+list_to_state([A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P], A/B/C/D/E/F/G/H/I/J/K/L/M/N/O/P).
 
-list_to_state([A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P], state(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)).
+goal_state(1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/'*').
 
-dfs([State|States], [], Path) :-
-    goal(State), !,
-    reverse([State|States], Path).
-
-dfs([State|States], [Move|Moves], Path) :-
-    move(State, Next, Move),
-    not(memberchk(Next, [State|States])),
-    dfs([Next,State|States], Moves, Path).
+answer(State, Goal, BlankMoves) :-
+    fFunction(State, Goal, 0, F),
+    search([(State, 0, F, [], [])], Goal, MovesList, StatesList),
+    reverse(MovesList, BlankMoves),
+    reverse(StatesList, ReversedStatesList),
+    show([start|BlankMoves], [State|ReversedStatesList]),
+    true.
 
 show([], _).
 show([Move|Moves], [State|States]) :-
-    State = state(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P),
+    State = A/B/C/D/E/F/G/H/I/J/K/L/M/N/O/P,
     format('~n~w~n~n', [Move]),
     format('~w ~w ~w ~w~n', [A, B, C, D]),
     format('~w ~w ~w ~w~n', [E, F, G, H]),
@@ -30,102 +27,151 @@ show([Move|Moves], [State|States]) :-
     format('~w ~w ~w ~w~n', [M, N, O, P]),
     show(Moves, States).
 
-goal(state(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)) :-
-    StateList = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P],
-    check_order(StateList).
+% A* algorithm
 
-check_order([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, *]).
-check_order([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, *, 15]).
-check_order([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, *, 14, 15]).
-check_order([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, *, 13, 14, 15]).
-check_order([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, *, 12, 13, 14, 15]).
-check_order([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, *, 11, 12, 13, 14, 15]).
-check_order([1, 2, 3, 4, 5, 6, 7, 8, 9, *, 10, 11, 12, 13, 14, 15]).
-check_order([1, 2, 3, 4, 5, 6, 7, 8, *, 9, 10, 11, 12, 13, 14, 15]).
-check_order([1, 2, 3, 4, 5, 6, 7, *, 8, 9, 10, 11, 12, 13, 14, 15]).
-check_order([1, 2, 3, 4, 5, 6, *, 7, 8, 9, 10, 11, 12, 13, 14, 15]).
-check_order([1, 2, 3, 4, 5, *, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).
-check_order([1, 2, 3, 4, *, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).
-check_order([1, 2, 3, *, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).
-check_order([1, 2, *, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).
-check_order([1, *, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).
-check_order([*, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).
+fFunction(State, Goal, Dn, Fn) :-
+    hFunction(State, Goal, Hn),
+    Fn is Dn + Hn.
 
-matches_order([], []).
-matches_order([H|T1], [H|T2]) :- matches_order(T1, T2).
-matches_order([*|T1], [_|T2]) :- matches_order(T1, T2).
+search([(State, _, _, MovesList, List)|_], Goal, MovesList, List) :-
+    isequal(State, Goal), !.
+search([N|Ns], Goal, MovesList, List) :-
+    expand(N, Children, Goal),
+    insertAll(Children, Ns, Open),
+    search(Open, Goal, MovesList, List).
 
-% Define possible moves for the blank space (*)
-move(State1, State2, Move) :-
-    state_to_list(State1, List),
-    nth0(Index, List, *),
-    valid_move(Index, NextIndex, Move),
-    swap(List, Index, NextIndex, NewList),
-    list_to_state(NewList, State2).
+insertAll([C|Cs], Open1, Open3) :-
+    insert(C, Open1, Open2),
+    insertAll(Cs, Open2, Open3).
+insertAll([], Open, Open).
 
-% Convert state to list representation
-state_to_list(state(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P), [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]).
+insert(B, [C|R], [B, C|R]) :- checkCost(B, C), !.
+insert(B, [B1|R], [B1|S]) :- insert(B, R, S), !.
+insert(B, [], [B]).
 
-% Swap elements at positions Index and NextIndex in the list
-swap(List, Index, NextIndex, NewList) :-
-    nth0(Index, List, Elem1),
-    nth0(NextIndex, List, Elem2),
-    set_elem(List, Index, Elem2, TempList),
-    set_elem(TempList, NextIndex, Elem1, NewList).
+checkCost((_, _, F1, _, _), (_, _, F2, _, _)) :- F1 < F2.
 
-% Set element at specific position in the list
+expand((State, Depth, _, M, L), All_My_Children, Goal) :-
+    findall((Child, D1, F, [Move|M], [Child|L]),
+            (D1 is Depth + 1, move(State, Child, Move), fFunction(Child, Goal, D1, F)),
+            All_My_Children).
+
+isequal(X, X).
+
+% Puzzle moves
+
+left(State, Goal) :-
+    getList(State, L1),
+    indexOf(L1, *, I1),
+    isLeftValid(I1),
+    NewSpace is I1 - 1,
+    elementAt(Num, L1, NewSpace),
+    swap_elements(L1, I1, NewSpace, L2),
+    getState(L2, Goal).
+
+right(State, Goal) :-
+    getList(State, L1),
+    indexOf(L1, *, I1),
+    isRightValid(I1),
+    NewSpace is I1 + 1,
+    elementAt(Num, L1, NewSpace),
+    swap_elements(L1, I1, NewSpace, L2),
+    getState(L2, Goal).
+
+up(State, Goal) :-
+    getList(State, L1),
+    indexOf(L1, *, I1),
+    isUpValid(I1),
+    NewSpace is I1 - 4,
+    elementAt(Num, L1, NewSpace),
+    swap_elements(L1, I1, NewSpace, L2),
+    getState(L2, Goal).
+
+down(State, Goal) :-
+    getList(State, L1),
+    indexOf(L1, *, I1),
+    isDownValid(I1),
+    NewSpace is I1 + 4,
+    elementAt(Num, L1, NewSpace),
+    swap_elements(L1, I1, NewSpace, L2),
+    getState(L2, Goal).
+
+isLeftValid(Space) :- X is mod(Space, 4), X \= 0.
+isRightValid(Space) :- X is mod(Space, 4), X \= 3.
+isUpValid(Space) :- Space >= 4.
+isDownValid(Space) :- Space < 12.
+
+swap_elements(L, I1, I2, R) :-
+    nth0(I1, L, E1),
+    nth0(I2, L, E2),
+    set_elem(L, I1, E2, L2),
+    set_elem(L2, I2, E1, R).
+
 set_elem([_|T], 0, Elem, [Elem|T]).
 set_elem([H|T], Index, Elem, [H|R]) :-
     Index > 0,
     Index1 is Index - 1,
     set_elem(T, Index1, Elem, R).
 
-% Define valid moves for each position of the blank space
-valid_move(0, 1, right).
-valid_move(0, 4, down).
-valid_move(1, 0, left).
-valid_move(1, 2, right).
-valid_move(1, 5, down).
-valid_move(2, 1, left).
-valid_move(2, 3, right).
-valid_move(2, 6, down).
-valid_move(3, 2, left).
-valid_move(3, 7, down).
-valid_move(4, 0, up).
-valid_move(4, 5, right).
-valid_move(4, 8, down).
-valid_move(5, 1, up).
-valid_move(5, 4, left).
-valid_move(5, 6, right).
-valid_move(5, 9, down).
-valid_move(6, 2, up).
-valid_move(6, 5, left).
-valid_move(6, 7, right).
-valid_move(6, 10, down).
-valid_move(7, 3, up).
-valid_move(7, 6, left).
-valid_move(7, 11, down).
-valid_move(8, 4, up).
-valid_move(8, 9, right).
-valid_move(8, 12, down).
-valid_move(9, 5, up).
-valid_move(9, 8, left).
-valid_move(9, 10, right).
-valid_move(9, 13, down).
-valid_move(10, 6, up).
-valid_move(10, 9, left).
-valid_move(10, 11, right).
-valid_move(10, 14, down).
-valid_move(11, 7, up).
-valid_move(11, 10, left).
-valid_move(11, 15, down).
-valid_move(12, 8, up).
-valid_move(12, 13, right).
-valid_move(13, 9, up).
-valid_move(13, 12, left).
-valid_move(13, 14, right).
-valid_move(14, 10, up).
-valid_move(14, 13, left).
-valid_move(14, 15, right).
-valid_move(15, 11, up).
-valid_move(15, 14, left).
+getList(A/B/C/D/E/F/G/H/I/J/K/L/M/N/O/P, [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]).
+
+getState([A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P], A/B/C/D/E/F/G/H/I/J/K/L/M/N/O/P).
+
+elementAt(X, [X|_], 0).
+elementAt(X, [_|L], K) :-
+    K > 0,
+    K1 is K - 1,
+    elementAt(X, L, K1).
+
+indexOf([Element|_], Element, 0) :- !.
+indexOf([_|Tail], Element, Index) :-
+    indexOf(Tail, Element, Index1),
+    !,
+    Index is Index1 + 1.
+
+move(State, Child, left) :- left(State, Child).
+move(State, Child, up) :- up(State, Child).
+move(State, Child, right) :- right(State, Child).
+move(State, Child, down) :- down(State, Child).
+
+hFunction(State, Goal, H) :-
+    getManhattanDistance(State, Goal, D),
+    H is D.
+
+getManhattanDistance(State, Goal, D) :-
+    getList(State, L1),
+    getList(Goal, L2),
+    md(L1, L1, L2, D).
+
+md([], _, _, 0).
+md([X|Xs], S, G, D) :-
+    (X \= * ->
+     indexOf(S, X, I1),
+     indexOf(G, X, I2),
+     manD(I1, I2, D1),
+     md(Xs, S, G, D2),
+     D is D1 + D2;
+     D1 = 0,
+     md(Xs, S, G, D2),
+     D is D1 + D2).
+
+manD(Space1, Space2, D) :-
+    getx(Space1, X1),
+    gety(Space1, Y1),
+    getx(Space2, X2),
+    gety(Space2, Y2),
+    mandist(X1/Y1, X2/Y2, D).
+
+mandist(X/Y, X1/Y1, D) :-
+    dif(X, X1, Dx),
+    dif(Y, Y1, Dy),
+    D is Dx + Dy.
+
+dif(A, B, D) :- D is A - B, D >= 0.
+dif(A, B, D) :- D is B - A, D > 0.
+
+getx(P, X) :- M is mod(P, 4), M = 0, X is 4, !.
+getx(P, X) :- X is mod(P, 4).
+
+gety(P, Y) :- M is mod(P, 4), M = 0, Y is P // 4, !.
+gety(P, Y) :- Y is truncate(P / 4 + 1).
