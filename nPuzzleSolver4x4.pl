@@ -2,12 +2,32 @@
 
 ids(StartList, MovesList) :-
     list_to_state(StartList, StartState),
-    goal_state(GoalState),
+    goal_state(GoalState), !,
     (answer(StartState, GoalState, MovesList) -> true ; false).
 
 list_to_state([A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P], A/B/C/D/E/F/G/H/I/J/K/L/M/N/O/P).
 
-goal_state(1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/'*').
+goal_state(State) :-
+    State = A/B/C/D/E/F/G/H/I/J/K/L/M/N/O/P,
+    StateList = A/B/C/D/E/F/G/H/I/J/K/L/M/N/O/P,
+    check_order(StateList).
+
+check_order(1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/'*').
+check_order(1/2/3/4/5/6/7/8/9/10/11/12/13/14/'*'/15).
+check_order(1/2/3/4/5/6/7/8/9/10/11/12/13/'*'/14/15).
+check_order(1/2/3/4/5/6/7/8/9/10/11/12/'*'/13/14/15).
+check_order(1/2/3/4/5/6/7/8/9/10/11/'*'/12/13/14/15).
+check_order(1/2/3/4/5/6/7/8/9/10/'*'/11/12/13/14/15).
+check_order(1/2/3/4/5/6/7/8/9/'*'/10/11/12/13/14/15).
+check_order(1/2/3/4/5/6/7/8/'*'/9/10/11/12/13/14/15).
+check_order(1/2/3/4/5/6/7/'*'/8/9/10/11/12/13/14/15).
+check_order(1/2/3/4/5/6/'*'/7/8/9/10/11/12/13/14/15).
+check_order(1/2/3/4/5/'*'/6/7/8/9/10/11/12/13/14/15).
+check_order(1/2/3/4/'*'/5/6/7/8/9/10/11/12/13/14/15).
+check_order(1/2/3/'*'/4/5/6/7/8/9/10/11/12/13/14/15).
+check_order(1/2/'*'/3/4/5/6/7/8/9/10/11/12/13/14/15).
+check_order(1/'*'/2/3/4/5/6/7/8/9/10/11/12/13/14/15).
+check_order('*'/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15).
 
 answer(State, Goal, BlankMoves) :-
     fFunction(State, Goal, 0, F),
