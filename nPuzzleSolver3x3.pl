@@ -33,26 +33,33 @@ goal(state(1, 2, 3, 4, 5, 6, 7, 8, *)).
 
 move(state(*, B, C, D, E, F, G, H, J), state(B, *, C, D, E, F, G, H, J), right).
 move(state(*, B, C, D, E, F, G, H, J), state(D, B, C, *, E, F, G, H, J), down).
-move(state(A, *, C, D, E, F, G, H, J), state(*, A, C, D, E, F, G, H, J), left).
 
+move(state(A, *, C, D, E, F, G, H, J), state(*, A, C, D, E, F, G, H, J), left).
 move(state(A, *, C, D, E, F, G, H, J), state(A, C, *, D, E, F, G, H, J), right).
 move(state(A, *, C, D, E, F, G, H, J), state(A, E, C, D, *, F, G, H, J), down).
+
 move(state(A, B, *, D, E, F, G, H, J), state(A, *, B, D, E, F, G, H, J), left).
 move(state(A, B, *, D, E, F, G, H, J), state(A, B, F, D, E, *, G, H, J), down).
+
 move(state(A, B, C, *, E, F, G, H, J), state(*, B, C, A, E, F, G, H, J), up).
 move(state(A, B, C, *, E, F, G, H, J), state(A, B, C, E, *, F, G, H, J), right).
 move(state(A, B, C, *, E, F, G, H, J), state(A, B, C, G, E, F, *, H, J), down).
+
 move(state(A, B, C, D, *, F, G, H, J), state(A, *, C, D, B, F, G, H, J), up).
 move(state(A, B, C, D, *, F, G, H, J), state(A, B, C, D, F, *, G, H, J), right).
 move(state(A, B, C, D, *, F, G, H, J), state(A, B, C, D, H, F, G, *, J), down).
 move(state(A, B, C, D, *, F, G, H, J), state(A, B, C, *, D, F, G, H, J), left).
+
 move(state(A, B, C, D, E, *, G, H, J), state(A, B, *, D, E, C, G, H, J), up).
 move(state(A, B, C, D, E, *, G, H, J), state(A, B, C, D, *, E, G, H, J), left).
 move(state(A, B, C, D, E, *, G, H, J), state(A, B, C, D, E, J, G, H, *), down).
+
 move(state(A, B, C, D, E, F, *, H, J), state(A, B, C, D, E, F, H, *, J), left).
 move(state(A, B, C, D, E, F, *, H, J), state(A, B, C, *, E, F, D, H, J), up).
+
 move(state(A, B, C, D, E, F, G, *, J), state(A, B, C, D, E, F, *, G, J), left).
 move(state(A, B, C, D, E, F, G, *, J), state(A, B, C, D, *, F, G, E, J), up).
 move(state(A, B, C, D, E, F, G, *, J), state(A, B, C, D, E, F, G, J, *), right).
+
 move(state(A, B, C, D, E, F, G, H, *), state(A, B, C, D, E, *, G, H, F), up).
 move(state(A, B, C, D, E, F, G, H, *), state(A, B, C, D, E, F, G, *, H), left).
